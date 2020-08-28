@@ -1,0 +1,13 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace NyesteTodo.Models
+{
+    public class TodoItem
+    {
+        public Guid Id { get; set; }
+        public string Descripton { get; set; }
+        [Display(Name = "Completed  ")]
+        public bool IsComplete { get; set; }
+    }
+}
