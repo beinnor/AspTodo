@@ -89,22 +89,6 @@ namespace NyesteTodo.Controllers
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkComplete([Bind("IsComplete")] TodoItem todoItem)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null) return Challenge();
-
-            if (ModelState.IsValid)
-            {
-                todoItem.Id = Guid.NewGuid();
-                todoItem.UserId = currentUser.Id;
-                _context.Add(todoItem);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(todoItem);
-        }
+        
     }
 }
