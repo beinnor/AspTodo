@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -15,35 +16,31 @@ namespace NyesteTodo.Controllers
     public class TodoController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public TodoController(ApplicationDbContext context)
+        public TodoController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Todo
         public async Task<IActionResult> Index()
         {
-            return View(await _context.TodoItem.ToListAsync());
-        }
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();            
 
-        // GET: Todo/Details/5
-        public async Task<IActionResult> Details(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            // Get todo-items from database
 
-            var todoItem = await _context.TodoItem
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
+            var items = await _context.TodoItem
+                .Where(x => x.UserId == currentUser.Id)
+                .ToArrayAsync();            
 
-            return View(todoItem);
-        }
+            // Pass the view to model and render
+
+            return View(items);
+            
+        }        
 
         // GET: Todo/Create
         public IActionResult Create()
@@ -58,99 +55,56 @@ namespace NyesteTodo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Descripton,IsComplete")] TodoItem todoItem)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
             if (ModelState.IsValid)
             {
                 todoItem.Id = Guid.NewGuid();
+                todoItem.UserId = currentUser.Id;
                 _context.Add(todoItem);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(todoItem);
-        }
-
-        // GET: Todo/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var todoItem = await _context.TodoItem.FindAsync(id);
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
-            return View(todoItem);
-        }
-
-        // POST: Todo/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Descripton,IsComplete")] TodoItem todoItem)
-        {
-            if (id != todoItem.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(todoItem);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TodoItemExists(todoItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(todoItem);
-        }
-
-        // GET: Todo/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var todoItem = await _context.TodoItem
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
-
-            return View(todoItem);
-        }
+        }        
 
         // POST: Todo/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
             var todoItem = await _context.TodoItem.FindAsync(id);
+
+            if (todoItem.UserId != currentUser.Id)
+            {
+                return BadRequest("No access!");
+            }
             _context.TodoItem.Remove(todoItem);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TodoItemExists(Guid id)
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkComplete([Bind("IsComplete")] TodoItem todoItem)
         {
-            return _context.TodoItem.Any(e => e.Id == id);
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            if (ModelState.IsValid)
+            {
+                todoItem.Id = Guid.NewGuid();
+                todoItem.UserId = currentUser.Id;
+                _context.Add(todoItem);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(todoItem);
         }
     }
 }
