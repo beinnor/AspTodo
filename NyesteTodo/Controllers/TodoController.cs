@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NyesteTodo.Data;
 using NyesteTodo.Models;
@@ -28,19 +26,19 @@ namespace NyesteTodo.Controllers
         public async Task<IActionResult> Index()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null) return Challenge();            
+            if (currentUser == null) return Challenge();
 
             // Get todo-items from database
 
             var items = await _context.TodoItem
                 .Where(x => x.UserId == currentUser.Id)
-                .ToArrayAsync();            
+                .ToArrayAsync();
 
             // Pass the view to model and render
 
             return View(items);
-            
-        }        
+
+        }
 
         // GET: Todo/Create
         public IActionResult Create()
@@ -67,7 +65,7 @@ namespace NyesteTodo.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(todoItem);
-        }        
+        }
 
         // POST: Todo/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -90,37 +88,45 @@ namespace NyesteTodo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkComplete(Guid id, [Bind("Id,IsComplete")] TodoItem todoItem)
+        public async Task<IActionResult> MarkComplete(Guid Id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (id != todoItem.Id || todoItem.UserId != currentUser.Id)
+            var todoItem = await _context.TodoItem.FindAsync(Id);
+
+            if (todoItem.UserId != currentUser.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            todoItem.IsComplete = !todoItem.IsComplete;
+
+            try
             {
-                try
-                {                    
-                    _context.Update(todoItem);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TodoItemExists(todoItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(todoItem);
+                await _context.SaveChangesAsync();
             }
-            return View(todoItem);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoItemExists(todoItem.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        
+        }
+    
+
+
+        private bool TodoItemExists(Guid id)
+        {
+            return _context.TodoItem.Any(e => e.Id == id);
         }
 
     }

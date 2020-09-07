@@ -29,7 +29,10 @@
                 @Html.DisplayFor(modelItem => item.Descripton)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IsComplete)
+                <form asp-action="MarkComplete" method="post">
+                    <input type="hidden" name="Id" value="@item.Id" />
+                    <input type="checkbox" name="IsComplete" checked="@item.IsComplete" class="completed-checkbox">
+                </form>                
             </td>
             <td>     
                 <form asp-action="Delete" method="post">
