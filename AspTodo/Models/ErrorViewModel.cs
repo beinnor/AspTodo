@@ -1,6 +1,6 @@
 using System;
 
-namespace NyesteTodo.Models
+namespace AspTodo.Models
 {
     public class ErrorViewModel
     {

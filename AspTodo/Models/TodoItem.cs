@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace NyesteTodo.Models
+namespace AspTodo.Models
 {
     public class TodoItem
     {

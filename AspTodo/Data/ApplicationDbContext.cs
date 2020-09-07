@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using NyesteTodo.Models;
+using AspTodo.Models;
 
-namespace NyesteTodo.Data
+namespace AspTodo.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {

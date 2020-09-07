@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NyesteTodo.Data;
-using NyesteTodo.Models;
+using AspTodo.Data;
+using AspTodo.Models;
 using System;
 using System.Linq;
 
-namespace NyesteTodo
+namespace AspTodo
 {
     public class SeedDb
     {
