@@ -1,5 +1,3 @@
-using System;
-
 namespace AspTodo.Models
 {
     public class ErrorViewModel

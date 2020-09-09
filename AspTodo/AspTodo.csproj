@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>aspnet-NyesteTodo-A899365C-AF17-4B62-B6F9-7051092A935D</UserSecretsId>
+    <UserSecretsId>aspnet-AspTodo-A899365C-AF17-4B62-B6F9-7051092A935D</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
