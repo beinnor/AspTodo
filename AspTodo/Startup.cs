@@ -51,6 +51,7 @@ namespace AspTodo
                     // Default SignIn settings.
                     options.SignIn.RequireConfirmedEmail = false;
                 })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews();

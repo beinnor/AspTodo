@@ -18,7 +18,7 @@ namespace AspTodo
 
                 try
                 {
-                    SeedDb.Initialize(services);
+                    SeedDb.Initialize(services).Wait();
                 }
                 catch (Exception ex)
                 {

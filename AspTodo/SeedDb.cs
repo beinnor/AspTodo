@@ -1,60 +1,51 @@
 ﻿using AspTodo.Data;
 using AspTodo.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AspTodo
 {
     public class SeedDb
     {
-        public static void Initialize(IServiceProvider serviceProvider)
+        public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            using (var context = new ApplicationDbContext(
-                serviceProvider.GetRequiredService<
-                    DbContextOptions<ApplicationDbContext>>()))
-            {
-                // Look for any Todos.
-                if (context.TodoItem.Any())
-                {
-                    return;   // DB has been seeded
-                }
-
-                context.TodoItem.AddRange(
-                    new TodoItem
-                    {
-                        Id = new Guid(),
-                        Descripton = "Vacuum whole apartment, from seed",
-                        IsComplete = false,
-                    },
-                    new TodoItem
-                    {
-                        Id = new Guid(),
-                        Descripton = "Finish project, from seed",
-                        IsComplete = true,
-                    },
-                    new TodoItem
-                    {
-                        Id = new Guid(),
-                        Descripton = "Walk the dog, from seed",
-                        IsComplete = false,
-                    },
-                    new TodoItem
-                    {
-                        Id = new Guid(),
-                        Descripton = "Feed baby, from seed",
-                        IsComplete = false,
-                    },
-                    new TodoItem
-                    {
-                        Id = new Guid(),
-                        Descripton = "Get a better job, from seed",
-                        IsComplete = true,
-                    }
-                );
-                context.SaveChanges();
-            }
+            await AddRolesAsync(serviceProvider);
+            await AddDefaultAdminUserAsync(serviceProvider);            
         }
+
+        private static async Task AddRolesAsync(IServiceProvider serviceProvider)
+        {
+            RoleManager<IdentityRole> roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var alreadyExists = await roleManager
+                .RoleExistsAsync(Constants.AdministratorRole);
+
+            if (alreadyExists) return;
+
+            await roleManager.CreateAsync(new IdentityRole(Constants.AdministratorRole));
+        }
+
+        private static async Task AddDefaultAdminUserAsync(IServiceProvider serviceProvider)
+        {
+            UserManager<IdentityUser> userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+            var defaultAdmin = await userManager.Users
+                .Where(x => x.UserName == "admin@asptodo.local").SingleOrDefaultAsync();
+
+            if (defaultAdmin != null) return;
+
+            defaultAdmin = new IdentityUser
+            {
+                UserName = "admin@asptodo.local",
+                Email = "admin@asptodo.local",
+            };
+
+            await userManager.CreateAsync(defaultAdmin, "password");
+            await userManager.AddToRoleAsync(defaultAdmin, Constants.AdministratorRole);
+        }
+        
     }
 }
