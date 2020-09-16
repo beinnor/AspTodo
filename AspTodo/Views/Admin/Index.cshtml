@@ -1,7 +1,46 @@
-﻿
+﻿@model AspTodo.Models.AdminViewModel;
+
 @{
     ViewData["Title"] = "Admin";
 }
 
-<h1>Admin</h1>
+<h1>Manage users</h1>
 
+<h2>Admins:</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Email</td>
+            <td></td>
+        </tr>
+    </thead>
+    @foreach (var admin in Model.Administrators)
+    {
+        <tr>
+            <td>@admin.Id</td>
+            <td>@admin.Email</td>
+            <td><button>Delete</button></td>
+        </tr>
+    }
+</table>
+
+
+<h2>Users:</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Email</td>
+            <td></td>
+        </tr>
+    </thead>
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.Id</td>
+            <td>@user.Email</td>
+            <td><button>Delete</button></td>
+        </tr>
+    }
+</table>

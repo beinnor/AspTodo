@@ -8,5 +8,6 @@ namespace AspTodo
     public class Constants
     {
         public const string AdministratorRole = "Admin";
+        public const string UserRole = "User";
     }
 }
