@@ -21,15 +21,12 @@ namespace AspTodo
         {
             RoleManager<IdentityRole> roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var alreadyExists = await roleManager
-                .RoleExistsAsync(Constants.AdministratorRole);
-
-            alreadyExists = await roleManager
-                .RoleExistsAsync(Constants.UserRole);
+                .RoleExistsAsync(Constants.AdministratorRole);            
 
             if (alreadyExists) return;
 
             await roleManager.CreateAsync(new IdentityRole(Constants.AdministratorRole));
-            await roleManager.CreateAsync(new IdentityRole(Constants.UserRole));
+            
         }
 
         private static async Task AddDefaultAdminUserAsync(IServiceProvider serviceProvider)

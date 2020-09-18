@@ -27,7 +27,9 @@ namespace AspTodo.Controllers
         {
             var admins = (await _userManager.GetUsersInRoleAsync(Constants.AdministratorRole)).ToArray();
 
-            var users = await _userManager.GetUsersInRoleAsync(Constants.UserRole)).ToArray();
+            var everyone = await _userManager.Users.ToArrayAsync();
+
+            var users = everyone.Except(admins).ToArray();
 
             var viewModel = new AdminViewModel
             {
@@ -37,6 +39,17 @@ namespace AspTodo.Controllers
 
             return View(viewModel);
 
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(Guid id)
+        {           
+            var user = await _userManager.FindByIdAsync(id.ToString());
+
+            var results = _userManager.DeleteAsync(user);
+
+            return RedirectToAction("Index");
         }
     }
 }

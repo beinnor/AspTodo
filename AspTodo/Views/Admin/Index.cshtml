@@ -40,7 +40,12 @@
         <tr>
             <td>@user.Id</td>
             <td>@user.Email</td>
-            <td><button>Delete</button></td>
+            <td>
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="Id" value="@user.Id" />
+                    <input type="submit" class="btn btn-danger" value="Delete" />
+                </form>
+            </td>
         </tr>
     }
 </table>
