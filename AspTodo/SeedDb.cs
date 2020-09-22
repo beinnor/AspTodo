@@ -42,9 +42,10 @@ namespace AspTodo
             {
                 UserName = "admin@asptodo.local",
                 Email = "admin@asptodo.local",
+                EmailConfirmed = true,
             };
 
-            await userManager.CreateAsync(defaultAdmin, "password");
+            await userManager.CreateAsync(defaultAdmin, "password");            
             await userManager.AddToRoleAsync(defaultAdmin, Constants.AdministratorRole);
         }
         
