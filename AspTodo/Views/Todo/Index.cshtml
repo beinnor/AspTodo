@@ -1,0 +1,48 @@
+﻿@model AspTodo.Models.TodoList
+
+@{
+    ViewData["Title"] = "AspTodo";
+}
+
+<h1>@Model.Name</h1>
+
+<p>
+    <a asp-action="Create">Create New Todo</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Description
+            </th>
+            <th>
+                Completed
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TodoItems)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Descripton)
+                </td>
+                <td>
+                    <form asp-action="MarkComplete" method="post">
+                        <input type="hidden" name="Id" value="@item.Id" />
+                        <input type="checkbox" name="IsComplete" checked="@item.IsComplete" class="completed-checkbox">
+                    </form>
+                </td>
+                <td>
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" name="Id" value="@item.Id" />
+                        <input type="submit" class="btn btn-danger" value="Delete" />
+                    </form>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

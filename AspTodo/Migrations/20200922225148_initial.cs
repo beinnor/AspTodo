@@ -47,17 +47,16 @@ namespace AspTodo.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TodoItem",
+                name: "TodoList",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Descripton = table.Column<string>(nullable: true),
-                    IsComplete = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
                     UserId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TodoItem", x => x.Id);
+                    table.PrimaryKey("PK_TodoList", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -166,6 +165,26 @@ namespace AspTodo.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "TodoItem",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Descripton = table.Column<string>(nullable: true),
+                    IsComplete = table.Column<bool>(nullable: false),
+                    TodoListId = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TodoItem", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TodoItem_TodoList_TodoListId",
+                        column: x => x.TodoListId,
+                        principalTable: "TodoList",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -204,6 +223,11 @@ namespace AspTodo.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TodoItem_TodoListId",
+                table: "TodoItem",
+                column: "TodoListId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -231,6 +255,9 @@ namespace AspTodo.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "TodoList");
         }
     }
 }

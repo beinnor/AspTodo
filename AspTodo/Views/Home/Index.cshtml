@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AspTodo.Models.TodoItem>
+﻿@model IEnumerable<AspTodo.Models.TodoList>
 
 @{
     ViewData["Title"] = "AspTodo";
@@ -7,36 +7,30 @@
 <h1>AspTodo</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Add new list</a>
 </p>
 
+<h2>Todo Lists</h2>
 <table class="table">
     <thead>
         <tr>
+            <th>                
+                Name
+            </th>            
             <th>
-                @Html.DisplayNameFor(model => model.Descripton)
+                Delete
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsComplete)
-            </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var list in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Descripton)
-            </td>
-            <td>
-                <form asp-action="MarkComplete" method="post">
-                    <input type="hidden" name="Id" value="@item.Id" />
-                    <input type="checkbox" name="IsComplete" checked="@item.IsComplete" class="completed-checkbox">
-                </form>                
-            </td>
+                <a asp-controller="Todo" asp-action="Index">@Html.DisplayFor(modelList => list.Name)</a>                
+            </td>            
             <td>     
                 <form asp-action="Delete" method="post">
-                    <input type="hidden" name="Id" value="@item.Id" />
+                    <input type="hidden" name="Id" value="@list.Id" />
                     <input type="submit" class="btn btn-danger" value="Delete" />
                 </form>
                 

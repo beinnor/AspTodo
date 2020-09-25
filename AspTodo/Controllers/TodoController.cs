@@ -4,24 +4,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AspTodo.Controllers
 {
     [Authorize]
-    public class HomeController : Controller
-    {
-        private readonly ILogger<HomeController> _logger;
+    public class TodoController : Controller
+    {        
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager)
-        {
-            _logger = logger;
+        public TodoController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        {            
             _context = context;
             _userManager = userManager;
         }
@@ -32,18 +31,20 @@ namespace AspTodo.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            // Get todo-lists from database
+            // Get todo-items from database
 
-            var lists = await _context.TodoList
-                .Where(x => x.UserId == currentUser.Id)
+            var items = await _context.TodoItem
+                .Where(x => x.TodoList.UserId == currentUser.Id)
                 .ToArrayAsync();
+
 
             // Pass the view to model and render
 
-            return View(lists);
+            return View(items);
 
         }
 
+        
         // GET: Todo/Create
         public IActionResult Create()
         {
@@ -55,20 +56,20 @@ namespace AspTodo.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] TodoList todoList)
+        public async Task<IActionResult> Create(TodoList todoList, [Bind("Id,Descripton,IsComplete")] TodoItem todoItem)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
             if (ModelState.IsValid)
             {
-                todoList.Id = Guid.NewGuid();
-                todoList.UserId = currentUser.Id;
-                _context.Add(todoList);
+                todoItem.Id = Guid.NewGuid();
+                todoItem.TodoList = todoList;
+                _context.Add(todoItem);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(todoList);
+            return View(todoItem);
         }
 
         // POST: Todo/Delete/5
@@ -79,20 +80,57 @@ namespace AspTodo.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            var todoList = await _context.TodoList.FindAsync(id);
+            var todoItem = await _context.TodoItem.FindAsync(id);
 
-            if (todoList.UserId != currentUser.Id)
+            if (todoItem.TodoList.UserId != currentUser.Id)
             {
                 return BadRequest("No access!");
             }
-            _context.TodoList.Remove(todoList);
+            _context.TodoItem.Remove(todoItem);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }        
+        }
 
-        private bool TodoListExists(Guid id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkComplete(Guid Id)
         {
-            return _context.TodoList.Any(e => e.Id == id);
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            var todoItem = await _context.TodoItem.FindAsync(Id);
+
+            if (todoItem.TodoList.UserId != currentUser.Id)
+            {
+                return NotFound();
+            }
+
+            todoItem.IsComplete = !todoItem.IsComplete;
+
+            try
+            {
+                _context.Update(todoItem);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoItemExists(todoItem.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+
+        }
+
+
+        private bool TodoItemExists(Guid id)
+        {
+            return _context.TodoItem.Any(e => e.Id == id);
         }
 
         public IActionResult Privacy()

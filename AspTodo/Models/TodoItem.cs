@@ -9,6 +9,6 @@ namespace AspTodo.Models
         public string Descripton { get; set; }
         [Display(Name = "Completed  ")]
         public bool IsComplete { get; set; }
-        public string UserId { get; set; }
+        public TodoList TodoList { get; set; }
     }
 }
