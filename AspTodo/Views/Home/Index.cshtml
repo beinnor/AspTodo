@@ -26,7 +26,8 @@
 @foreach (var list in Model) {
         <tr>
             <td>
-                <a asp-controller="Todo" asp-action="Index">@Html.DisplayFor(modelList => list.Name)</a>                
+                <a asp-controller="Todo" asp-action="Index" asp-route-id="@list.Id">@Html.DisplayFor(modelList => list.Name)</a>
+                @list.Id
             </td>            
             <td>     
                 <form asp-action="Delete" method="post">

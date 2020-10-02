@@ -38,7 +38,7 @@ namespace AspTodo.Controllers
                 .Where(x => x.UserId == currentUser.Id)
                 .ToArrayAsync();
 
-            // Pass the view to model and render
+            // Pass the view to model and render            
 
             return View(lists);
 

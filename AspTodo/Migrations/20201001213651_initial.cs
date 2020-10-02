@@ -47,19 +47,6 @@ namespace AspTodo.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TodoList",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    UserId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TodoList", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -166,13 +153,32 @@ namespace AspTodo.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TodoList",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TodoList", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TodoList_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TodoItem",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     Descripton = table.Column<string>(nullable: true),
                     IsComplete = table.Column<bool>(nullable: false),
-                    TodoListId = table.Column<Guid>(nullable: true)
+                    TodoListId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -182,7 +188,7 @@ namespace AspTodo.Migrations
                         column: x => x.TodoListId,
                         principalTable: "TodoList",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -228,6 +234,11 @@ namespace AspTodo.Migrations
                 name: "IX_TodoItem_TodoListId",
                 table: "TodoItem",
                 column: "TodoListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TodoList_UserId",
+                table: "TodoList",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -254,10 +265,10 @@ namespace AspTodo.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "TodoList");
 
             migrationBuilder.DropTable(
-                name: "TodoList");
+                name: "AspNetUsers");
         }
     }
 }

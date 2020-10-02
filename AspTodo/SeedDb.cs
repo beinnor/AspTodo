@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,6 +33,8 @@ namespace AspTodo
         private static async Task AddDefaultAdminUserAsync(IServiceProvider serviceProvider)
         {
             UserManager<IdentityUser> userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            // ApplicationDbContext _context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+
 
             var defaultAdmin = await userManager.Users
                 .Where(x => x.UserName == "admin@asptodo.local").SingleOrDefaultAsync();
@@ -47,7 +50,50 @@ namespace AspTodo
 
             await userManager.CreateAsync(defaultAdmin, "password");            
             await userManager.AddToRoleAsync(defaultAdmin, Constants.AdministratorRole);
+
+
+            //TodoList todoList1 = new TodoList
+            //{
+            //    Id = new Guid(),
+            //    Name = "DefaultAdminList1",
+            //    UserId = defaultAdmin.Id,
+            //    User = defaultAdmin,   
+            //    TodoItems = {},
+            //};
+
+            //TodoItem todoItem1 = new TodoItem
+            //{
+            //    Id = new Guid(),
+            //    Descripton = "todoitem1",
+            //    IsComplete = false,
+                
+            //    TodoListId = todoList1.Id,
+            //    TodoList = todoList1
+            //};
+
+            //TodoItem todoItem2 = new TodoItem
+            //{
+            //    Id = new Guid(),
+            //    Descripton = "todoitem2",
+            //    IsComplete = true,
+
+            //    TodoListId = todoList1.Id,
+            //    TodoList = todoList1
+            //};
+
+
+
+           // todoList1.TodoItems.Add(todoItem1);
+            
+
+           // _context.Add(todoList1);
+
+            //_context.Add(todoItem1);
+            //_context.Add(todoItem2);
+
+            // await _context.SaveChangesAsync();
         }
+
         
     }
 }
