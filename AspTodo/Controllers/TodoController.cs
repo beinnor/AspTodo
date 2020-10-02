@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AspTodo.Data;
 using AspTodo.Models;
+using AspTodo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,28 +14,24 @@ namespace AspTodo.Controllers
 {
     [Authorize]
     public class TodoController : Controller
-    {        
-        private readonly ApplicationDbContext _context;
+    {                
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAspTodoService _aspTodoService;
 
-        public TodoController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public TodoController(UserManager<IdentityUser> userManager, IAspTodoService aspTodoService)
         {            
-            _context = context;
             _userManager = userManager;
+            _aspTodoService = aspTodoService;
         }
 
-        public IActionResult Index(Guid Id)
+        public async Task<IActionResult> Index(Guid Id)
         {
-            var list = _context.TodoList
-                .Single(x => x.Id == Id);
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
 
-            _context.Entry(list)
-                .Collection(x => x.TodoItems)
-                .Load();
-            
-
-            // return View(list);
-            return View(list.TodoItems);
+            var todoItems = _aspTodoService.GetTodoItemsAsync(currentUser, Id);
+                        
+            return View(todoItems);
         }
 
         

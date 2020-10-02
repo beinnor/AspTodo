@@ -1,13 +1,10 @@
-﻿using AspTodo.Data;
-using AspTodo.Models;
+﻿using AspTodo.Models;
+using AspTodo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AspTodo.Controllers
@@ -15,15 +12,17 @@ namespace AspTodo.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context;
+        private readonly ILogger<HomeController> _logger;        
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAspTodoService _aspTodoService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public HomeController(ILogger<HomeController> logger,                              
+                              UserManager<IdentityUser> userManager,
+                              IAspTodoService aspTodoService)
         {
-            _logger = logger;
-            _context = context;
+            _logger = logger;            
             _userManager = userManager;
+            _aspTodoService = aspTodoService;
         }
 
         // GET: Todo
@@ -32,13 +31,7 @@ namespace AspTodo.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            // Get todo-lists from database
-
-            var lists = await _context.TodoList
-                .Where(x => x.UserId == currentUser.Id)
-                .ToArrayAsync();
-
-            // Pass the view to model and render            
+            var lists = await _aspTodoService.GetTodoListsAsync(currentUser);           
 
             return View(lists);
 
@@ -60,15 +53,19 @@ namespace AspTodo.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (ModelState.IsValid)
-            {
-                todoList.Id = Guid.NewGuid();
-                todoList.UserId = currentUser.Id;
-                _context.Add(todoList);
-                await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {                
                 return RedirectToAction(nameof(Index));
             }
-            return View(todoList);
+
+            var success = await _aspTodoService.AddListAsync(currentUser, todoList);
+            if (!success)
+            {
+                return BadRequest("Could not add todolist.");
+            }
+
+            return RedirectToAction("Index");
+
         }
 
         // POST: Todo/Delete/5
@@ -78,32 +75,15 @@ namespace AspTodo.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
+            
 
-            var todoList = await _context.TodoList.FindAsync(id);
-
-            if (todoList.UserId != currentUser.Id)
+            if (!await _aspTodoService.DeleteListAsync(currentUser, id))
             {
-                return BadRequest("No access!");
+                return BadRequest("Could not delete list!");
             }
-            _context.TodoList.Remove(todoList);
-            await _context.SaveChangesAsync();
+            
             return RedirectToAction(nameof(Index));
         }        
-
-        private bool TodoListExists(Guid id)
-        {
-            return _context.TodoList.Any(e => e.Id == id);
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        
     }
 }

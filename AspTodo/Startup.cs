@@ -1,4 +1,5 @@
 using AspTodo.Data;
+using AspTodo.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -56,6 +57,8 @@ namespace AspTodo
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddScoped<IAspTodoService, AspTodoService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
