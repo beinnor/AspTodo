@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace AspTodo.Services
@@ -25,7 +24,7 @@ namespace AspTodo.Services
             newTodoList.Id = Guid.NewGuid();
             newTodoList.UserId = user.Id;
             _context.Add(newTodoList);
-            var results = await _context.SaveChangesAsync();
+            int results = await _context.SaveChangesAsync();
 
             return results == 1;
             
@@ -38,14 +37,14 @@ namespace AspTodo.Services
 
         public async Task<bool> DeleteListAsync(IdentityUser user, Guid todoListId)
         {
-            var todoList = await _context.TodoList.FindAsync(todoListId);
+            TodoList todoList = await _context.TodoList.FindAsync(todoListId);
 
             if (todoList.UserId != user.Id)
             {
                 return false;
             }
             _context.TodoList.Remove(todoList);
-            var results = await _context.SaveChangesAsync();
+            int results = await _context.SaveChangesAsync();
 
             return results == 1;
         }
@@ -55,24 +54,28 @@ namespace AspTodo.Services
             throw new NotImplementedException();
         }
 
-        public async Task<TodoItem[]> GetTodoItemsAsync(IdentityUser user, Guid todoListId)
-        {
-            // TODO: gjør noe a la dette
+        public async Task<List<TodoItem>> GetTodoItemsAsync(IdentityUser user, Guid todoListId)
+        {            
 
-            var items = await _context.TodoItem
-                .Where(x => x.TodoList.UserId == user.Id && x.TodoListId == todoListId)
-                .ToArrayAsync();
+            List<TodoList> list = await _context.TodoList
+                .Where(x => x.UserId == user.Id && x.Id == todoListId)
+                .Include(x => x.TodoItems)
+                .ToListAsync();
+
+            List<TodoItem> items = list[0].TodoItems.ToList<TodoItem>();
+
+            
 
             return items;
         }
 
-        public async Task<TodoList[]> GetTodoListsAsync(IdentityUser user)
+        public async Task<List<TodoList>> GetTodoListsAsync(IdentityUser user)
         {            
             // Get todo-lists from database
 
-            var lists = await _context.TodoList
+            List<TodoList> lists = await _context.TodoList
                 .Where(x => x.UserId == user.Id)
-                .ToArrayAsync();
+                .ToListAsync<TodoList>();
 
             // Pass the view to model and render            
 

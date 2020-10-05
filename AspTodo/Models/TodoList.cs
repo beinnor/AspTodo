@@ -12,6 +12,6 @@ namespace AspTodo.Models
         public string UserId { get; set; }
         public IdentityUser User { get; set; }
 
-        public ICollection<TodoItem> TodoItems { get; set; }
+        public List<TodoItem> TodoItems { get; set; }
     }
 }

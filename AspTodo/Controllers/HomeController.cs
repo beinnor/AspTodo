@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AspTodo.Controllers
@@ -31,7 +32,7 @@ namespace AspTodo.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            var lists = await _aspTodoService.GetTodoListsAsync(currentUser);           
+            List<TodoList> lists = await _aspTodoService.GetTodoListsAsync(currentUser);           
 
             return View(lists);
 
@@ -50,7 +51,7 @@ namespace AspTodo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name")] TodoList todoList)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            IdentityUser currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
             if (!ModelState.IsValid)
@@ -58,7 +59,7 @@ namespace AspTodo.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var success = await _aspTodoService.AddListAsync(currentUser, todoList);
+            bool success = await _aspTodoService.AddListAsync(currentUser, todoList);
             if (!success)
             {
                 return BadRequest("Could not add todolist.");
@@ -73,7 +74,7 @@ namespace AspTodo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            IdentityUser currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
             
 

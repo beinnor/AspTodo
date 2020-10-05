@@ -1,10 +1,12 @@
-﻿@model IEnumerable<AspTodo.Models.TodoItem>
+﻿@model List<AspTodo.Models.TodoItem>
 
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>Todos in List</h1>
+
+
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -45,3 +47,4 @@
 }
     </tbody>
 </table>
+

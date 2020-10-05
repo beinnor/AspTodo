@@ -29,7 +29,7 @@ namespace AspTodo.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            var todoItems = _aspTodoService.GetTodoItemsAsync(currentUser, Id);
+            List<TodoItem> todoItems = await _aspTodoService.GetTodoItemsAsync(currentUser, Id);
                         
             return View(todoItems);
         }
