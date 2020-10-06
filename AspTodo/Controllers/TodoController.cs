@@ -30,10 +30,64 @@ namespace AspTodo.Controllers
             if (currentUser == null) return Challenge();
 
             List<TodoItem> todoItems = await _aspTodoService.GetTodoItemsAsync(currentUser, Id);
-                        
-            return View(todoItems);
+
+            TodoItemsVm viewModel = new TodoItemsVm
+            {
+                TodoListId = Id,
+                TodoItems = todoItems,
+            };
+
+            return View(viewModel);
         }
 
-        
+        public IActionResult Create(Guid Id)
+        {
+            TodoItem viewModel = new TodoItem()
+            {
+                TodoListId = Id,
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Descripton, IsComplete, TodoListId")] TodoItem todoItem)
+        {
+            IdentityUser currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            bool success = await _aspTodoService.AddTodoItemAsync(currentUser, todoItem);
+            if (!success)
+            {
+                return BadRequest("Could not add todoitem.");
+            }
+
+            return RedirectToAction("Index", new { Id = todoItem.TodoListId});
+
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(Guid ItemId, Guid ListId)
+        {
+            IdentityUser currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+
+            if (!await _aspTodoService.DeleteTodoItemAsync(currentUser, ItemId))
+            {
+                return BadRequest("Could not delete item!");
+            }
+
+            return RedirectToAction("Index", new { Id = ListId });
+        }
+
+
     }
 }

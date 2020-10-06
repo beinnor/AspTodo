@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,9 +31,17 @@ namespace AspTodo.Services
             
         }
 
-        public Task<bool> AddTodoItemAsync(IdentityUser user, Guid todoListId, TodoItem newTodoItem)
-        {
-            throw new NotImplementedException();
+        public async Task<bool> AddTodoItemAsync(IdentityUser user, TodoItem newTodoItem)
+        {          
+
+            TodoList tempTodoList = await _context.TodoList.FindAsync(newTodoItem.TodoListId);
+
+            newTodoItem.Id = Guid.NewGuid();
+            newTodoItem.TodoList = tempTodoList;
+            _context.Add(newTodoItem);
+            int results = await _context.SaveChangesAsync();
+
+            return results == 1;
         }
 
         public async Task<bool> DeleteListAsync(IdentityUser user, Guid todoListId)
@@ -49,9 +58,20 @@ namespace AspTodo.Services
             return results == 1;
         }
 
-        public Task<bool> DeleteTodoItemAsync(IdentityUser user, Guid todoItemId)
+        public async Task<bool> DeleteTodoItemAsync(IdentityUser user, Guid todoItemId)
         {
-            throw new NotImplementedException();
+            TodoItem todoItem = await _context.TodoItem.FindAsync(todoItemId);
+
+            TodoList todoList = await _context.TodoList.FindAsync(todoItem.TodoListId);
+
+            if (todoList.UserId != user.Id)
+            {
+                return false;
+            }
+            _context.TodoItem.Remove(todoItem);
+            int results = await _context.SaveChangesAsync();
+
+            return results == 1;
         }
 
         public async Task<List<TodoItem>> GetTodoItemsAsync(IdentityUser user, Guid todoListId)
@@ -62,9 +82,7 @@ namespace AspTodo.Services
                 .Include(x => x.TodoItems)
                 .ToListAsync();
 
-            List<TodoItem> items = list[0].TodoItems.ToList<TodoItem>();
-
-            
+            List<TodoItem> items = list[0].TodoItems.ToList<TodoItem>();           
 
             return items;
         }
