@@ -108,7 +108,7 @@ namespace AspTodo.Services
 
             if (item == null) return false;
 
-            item.IsComplete = true;
+            item.IsComplete = !item.IsComplete;
 
             var saveResult = await _context.SaveChangesAsync();
 

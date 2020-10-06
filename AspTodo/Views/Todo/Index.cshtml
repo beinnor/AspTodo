@@ -26,15 +26,23 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.TodoItems) {
-        <tr>
+@foreach (var item in Model.TodoItems) {        
+            
+         <tr @if (item.IsComplete) { <text>class="done"</text>; }> 
+             
             <td>
                 @Html.DisplayFor(modelItem => item.Descripton)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IsComplete)
-            </td>            
-            <td>                
+
+
+                <form asp-action="MarkDone" method="post">
+                    <input asp-for="@item.IsComplete" type="checkbox" class="done-checkbox">
+                    <input type="hidden" name="ItemId" value="@item.Id" />
+                    <input type="hidden" name="ListId" value="@item.TodoListId" />
+                </form>
+            </td>
+            <td>
                 <form asp-action="Delete" method="post">
                     <input type="hidden" name="ItemId" value="@item.Id" />
                     <input type="hidden" name="ListId" value="@item.TodoListId" />

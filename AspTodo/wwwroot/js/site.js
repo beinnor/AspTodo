@@ -3,7 +3,7 @@
 
 // Write your JavaScript code.
 
-document.querySelectorAll('.completed-checkbox').forEach(item => {
+document.querySelectorAll('.done-checkbox').forEach(item => {
     item.addEventListener('click', e => markComplete(e.target))
 })
 
