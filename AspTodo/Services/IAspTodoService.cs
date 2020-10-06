@@ -17,5 +17,7 @@ namespace AspTodo.Services
         Task<bool> AddTodoItemAsync(IdentityUser user, TodoItem newTodoItem);
         Task<bool> DeleteTodoItemAsync(IdentityUser user, Guid todoItemId);
 
+        Task<bool> MarkItemDoneAsync(Guid ItemId, Guid ListId);
+
     }
 }

@@ -88,6 +88,20 @@ namespace AspTodo.Controllers
             return RedirectToAction("Index", new { Id = ListId });
         }
 
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkDone(Guid ItemId, Guid ListId)
+        {            
+            IdentityUser currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            bool successful = await _aspTodoService.MarkItemDoneAsync(ItemId, ListId);
+            if (!successful)
+            {
+                return BadRequest("Couldn't mark item as done!");
+            }
+
+            return RedirectToAction("Index", new { Id = ListId });
+        }
 
     }
 }

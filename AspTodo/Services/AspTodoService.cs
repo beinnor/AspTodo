@@ -99,5 +99,20 @@ namespace AspTodo.Services
 
             return lists;
         }
+
+        public async Task<bool> MarkItemDoneAsync(Guid ItemId, Guid ListId)
+        {
+            TodoItem item = await _context.TodoItem
+                .Where(x => x.Id == ItemId && x.TodoListId == ListId)
+                .SingleOrDefaultAsync();
+
+            if (item == null) return false;
+
+            item.IsComplete = true;
+
+            var saveResult = await _context.SaveChangesAsync();
+
+            return saveResult == 1;
+        }
     }
 }
